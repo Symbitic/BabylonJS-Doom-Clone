@@ -4,7 +4,6 @@
   "version": "1.0.0",
   "description": "Doom style game crafted with love using Babylon.js",
   "type": "module",
-  "main": "main.js",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",

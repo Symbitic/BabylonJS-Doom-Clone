@@ -1,22 +1,3 @@
 # BabylonJS-Doom-Clone
 
-# To do
-1. Modularize everything into ES6 modules.
-2. Create wall collision for monsters.
-3. Fix lighting on gun (maybe impossible?).
-4. Create a health UI.
-
-# How to run for development
-1. npm install
-2. npm run dev
-3. localhost:8080
-
-# How to run for production
-1. npm install
-2. npm start
-
-Check package.json for what npm scripts do.
-
-https://doc.babylonjs.com/features/featuresDeepDive/events/observables
-https://doc.babylonjs.com/typedoc/classes/BABYLON.Observable
-https://doc.babylonjs.com/features/featuresDeepDive/events/observables
+This is a modernized fork of <https://github.com/CelesteComet/BabylonJS-Doom-Clone> that adds TypeScript and Vite support for faster development.

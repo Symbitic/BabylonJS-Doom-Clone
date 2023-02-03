@@ -32,7 +32,7 @@ export class Game {
         mapEditor.init();
         keyboardManager.init();
 
-        console.log("Adding beautiful lights");
+        // @ts-ignore
         const light = new HemisphericLight("light1", new Vector3(0, 1, 0), scene);
 
         console.log("Adding a beautiful floor");
