@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BabylonJS Doom Clone</title>
+    <style>
+      html,
+      body {
+  
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+  
+      #renderCanvas {
+        width: 100%;
+        height: 100%;
+        touch-action: none;
+  
+      }
+  
+      #mapEditor {
+        width: 1000px;
+        height: 1000px;
+        display: inline-block;
+        padding: 5px;
+      }
+  
+      #gunsight {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        margin-top: -9px;
+        margin-left: -3px;
+      }
+  
+      .editor {
+        float: left;
+      }
+  
+      #fpsLabel {
+        position: absolute;
+        right: 20px;
+        top: 20px;
+        color: #999;
+        cursor: default;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="renderCanvas" touch-action="none"></canvas>
+    <div id='gunsight'>+</div>
+    <div class='container'>
+      <div id='fpsLabel'></div>
+      <canvas id='mapEditor' height="1000px" width="1000px"></canvas>
+      <div class='editor'>
+        <select id='mainSelect'> <!--Supplement an id here instead of using 'name'-->
+          <option value="wall" selected>Wall</option>
+          <option value="Imp">Imp</option>
+        </select>
+        <button id='saveMap'>SAVE MAP</button>
+        <button id='deleteMap'>DELETE MAP</button>
+      </div>
+      <canvas id='mapper' height="100px" width="100px"></canvas>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

@@ -16,3 +16,7 @@
 2. npm start
 
 Check package.json for what npm scripts do.
+
+https://doc.babylonjs.com/features/featuresDeepDive/events/observables
+https://doc.babylonjs.com/typedoc/classes/BABYLON.Observable
+https://doc.babylonjs.com/features/featuresDeepDive/events/observables
