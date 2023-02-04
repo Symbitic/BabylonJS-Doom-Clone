@@ -3,21 +3,26 @@ import { scene, assetsManager } from "./globals";
 import { options } from "./options";
 import { Game } from "./game";
 
-const { debug, verbose } = options;
+const { verbose } = options;
 
-if (import.meta.env.DEV || debug) {
-    await import("@babylonjs/inspector");
-    // Hide/show the Inspector
-    window.addEventListener("keydown", (ev) => {
-        // Ctrl+I
-        if (ev.ctrlKey && ev.key === "I") {
-            if (scene.debugLayer.isVisible()) {
-                scene.debugLayer.hide();
-            } else {
-                scene.debugLayer.show();
-            }
-        }
-    });
+if (import.meta.env.DEV) {
+    import("@babylonjs/inspector")
+        .then(() => {
+            // Hide/show the Inspector
+            window.addEventListener("keydown", (ev) => {
+                // Ctrl+I
+                if (ev.ctrlKey && ev.key === "I") {
+                    if (scene.debugLayer.isVisible()) {
+                        scene.debugLayer.hide();
+                    } else {
+                        scene.debugLayer.show();
+                    }
+                }
+            });
+        })
+        .catch((e) => {
+            console.log(`Failed to load inspector: ${e.message}`);
+        });
 }
 
 export interface IAssets {
