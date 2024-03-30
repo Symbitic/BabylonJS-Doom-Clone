@@ -3,7 +3,5 @@ export const options: Record<string, boolean> = {
     debug: false,
     showNormals: true,
     showAxis: true,
-    hell: true
+    hell: true,
 };
-
-export default options;

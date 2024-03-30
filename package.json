@@ -15,12 +15,12 @@
     "url": "git+https://github.com/babylonjs-archive/doom-clone.git"
   },
   "dependencies": {
-    "@babylonjs/core": "^5.45.0",
-    "@babylonjs/gui": "^5.45.0",
-    "@babylonjs/inspector": "^5.45.0"
+    "@babylonjs/core": "^7.0.0",
+    "@babylonjs/gui": "^7.0.0",
+    "@babylonjs/inspector": "^7.0.0"
   },
   "devDependencies": {
-    "typescript": "^4.9.5",
-    "vite": "^4.1.1"
+    "typescript": "^5.4.3",
+    "vite": "^5.2.7"
   }
 }

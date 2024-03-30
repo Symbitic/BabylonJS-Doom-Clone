@@ -1,27 +1,48 @@
-import { Ray, Vector3 } from "@babylonjs/core";
-import { camera, scene } from "./globals";
+import { Ray } from "@babylonjs/core/Culling/ray.js";
+import { Vector3 } from "@babylonjs/core/Maths/math.vector.js";
+import { camera, scene } from "./globals.js";
 
 export function getCameraRay() {
-    return new Ray(camera.globalPosition, camera.getTarget().subtract(camera.globalPosition).normalize());
+    return new Ray(
+        camera.globalPosition,
+        camera.getTarget().subtract(camera.globalPosition).normalize(),
+    );
 }
 
 export function getCameraRayCastPickInfoWithOffset() {
     const target = camera.getTarget().clone();
-    target.x += Math.random() * 0.05 * (Math.floor(Math.random() * 2) == 1 ? 1 : -1) * 0.7;
-    target.y += Math.random() * 0.05 * (Math.floor(Math.random() * 2) == 1 ? 1 : -1) * 0.7;
-    const ray = new Ray(camera.globalPosition, target.subtract(camera.globalPosition).normalize());
+    target.x +=
+        Math.random() *
+        0.05 *
+        (Math.floor(Math.random() * 2) == 1 ? 1 : -1) *
+        0.7;
+    target.y +=
+        Math.random() *
+        0.05 *
+        (Math.floor(Math.random() * 2) == 1 ? 1 : -1) *
+        0.7;
+    const ray = new Ray(
+        camera.globalPosition,
+        target.subtract(camera.globalPosition).normalize(),
+    );
     const pickInfo = scene.pickWithRay(ray);
     return pickInfo;
 }
 
 export function getCameraRayCastPosition() {
-    const ray = new Ray(camera.globalPosition, camera.getTarget().subtract(camera.globalPosition).normalize());
+    const ray = new Ray(
+        camera.globalPosition,
+        camera.getTarget().subtract(camera.globalPosition).normalize(),
+    );
     const pickInfo = scene.pickWithRay(ray);
     return pickInfo!.pickedPoint;
 }
 
 export function getCameraRayCastPickInfo() {
-    const ray = new Ray(camera.globalPosition, camera.getTarget().subtract(camera.globalPosition).normalize());
+    const ray = new Ray(
+        camera.globalPosition,
+        camera.getTarget().subtract(camera.globalPosition).normalize(),
+    );
     const pickInfo = scene.pickWithRay(ray);
     return pickInfo;
 }
@@ -48,15 +69,24 @@ export function getRadiansBetweenTwoVectors(origin: Vector3, point: Vector3) {
 }
 
 export function getDegreesBetweenTwoVectors(origin: Vector3, point: Vector3) {
-    let degs = getRadiansBetweenTwoVectors(origin, point) * 180 / Math.PI;
+    let degs = (getRadiansBetweenTwoVectors(origin, point) * 180) / Math.PI;
     if (degs < 0) {
-        degs += 360
+        degs += 360;
     }
     return degs;
 }
 
 export function flipDirection(objectFacing: any, cameraRelativeToObject: any) {
-    const arr: string[] = ["down", "downRight", "right", "upRight", "up", "upLeft", "left", "downLeft"];
+    const arr: string[] = [
+        "down",
+        "downRight",
+        "right",
+        "upRight",
+        "up",
+        "upLeft",
+        "left",
+        "downLeft",
+    ];
     const o: Record<string, number> = {
         down: 0,
         downRight: 1,
@@ -65,7 +95,7 @@ export function flipDirection(objectFacing: any, cameraRelativeToObject: any) {
         up: 4,
         upLeft: 5,
         left: 6,
-        downLeft: 7
+        downLeft: 7,
     };
 
     const s = o[objectFacing] - o[cameraRelativeToObject];
@@ -77,7 +107,7 @@ export function flipDirection(objectFacing: any, cameraRelativeToObject: any) {
 }
 
 export function getRelativePosition(deg: number) {
-    if (deg <= 30 && deg >= 0 || deg > 330 && deg <= 360) {
+    if ((deg <= 30 && deg >= 0) || (deg > 330 && deg <= 360)) {
         return "right";
     } else if (deg <= 60) {
         return "downRight";

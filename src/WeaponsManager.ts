@@ -1,16 +1,15 @@
-import {
-    Color4,
-    Material,
-    MeshBuilder,
-    ParticleSystem,
-    Texture,
-    Vector3,
-} from "@babylonjs/core";
-import { scene, cambox } from './globals';
-import { sounds } from './sounds';
-import { monsterManager } from './MonsterManager';
-import { uiManager } from './UIManager';
-import { getCameraRayCastPickInfoWithOffset } from "./utils";
+import { Color4 } from "@babylonjs/core/Maths/math.color.js";
+import { Material } from "@babylonjs/core/Materials/material.js";
+import { MeshBuilder } from "@babylonjs/core/Meshes/meshBuilder.js";
+import { ParticleSystem } from "@babylonjs/core/Particles/particleSystem.js";
+import { Texture } from "@babylonjs/core/Materials/Textures/texture.js";
+import { Vector3 } from "@babylonjs/core/Maths/math.vector.js";
+
+import { scene, cambox } from "./globals.js";
+import { sounds } from "./sounds.js";
+import { monsterManager } from "./MonsterManager.js";
+import { uiManager } from "./UIManager.js";
+import { getCameraRayCastPickInfoWithOffset } from "./utils.js";
 
 export interface Gun {
     shoot(): void;
@@ -26,11 +25,11 @@ class Shotgun implements Gun {
     waveTick = 0;
     canShoot = true;
     animationFrame: number[] = [0, 1, 2, 3, 4, 5, 6, 5, 4];
-    mesh = MeshBuilder.CreatePlane('weapon', { width: 1 }, scene);
+    mesh = MeshBuilder.CreatePlane("weapon", { width: 1 }, scene);
     currentPosition = new Vector3();
     previousPosition = new Vector3();
 
-    constructor(private bulletHoleMaterial: Material) { }
+    constructor(private bulletHoleMaterial: Material) {}
 
     shoot() {
         this.ammo--;
@@ -42,16 +41,31 @@ class Shotgun implements Gun {
             const pickInfo = getCameraRayCastPickInfoWithOffset();
             if (pickInfo && pickInfo.pickedMesh) {
                 const decalSize = new Vector3(0.1, 0.1, 0.1);
-                const decal = MeshBuilder.CreateDecal("decal", pickInfo.pickedMesh, {
-                    position: pickInfo.pickedPoint!,
-                    normal: pickInfo.getNormal(true)!,
-                    size: decalSize
-                });
+                const decal = MeshBuilder.CreateDecal(
+                    "decal",
+                    pickInfo.pickedMesh,
+                    {
+                        position: pickInfo.pickedPoint!,
+                        normal: pickInfo.getNormal(true)!,
+                        size: decalSize,
+                    },
+                );
 
                 decal.material = this.bulletHoleMaterial;
-                if (pickInfo && pickInfo.pickedMesh && pickInfo.pickedMesh.name === 'imp') {
-                    const particleSystem = new ParticleSystem("particles", 400, scene);
-                    particleSystem.particleTexture = new Texture("textures/Flare.png", scene);
+                if (
+                    pickInfo &&
+                    pickInfo.pickedMesh &&
+                    pickInfo.pickedMesh.name === "imp"
+                ) {
+                    const particleSystem = new ParticleSystem(
+                        "particles",
+                        400,
+                        scene,
+                    );
+                    particleSystem.particleTexture = new Texture(
+                        "textures/Flare.png",
+                        scene,
+                    );
                     particleSystem.emitter = pickInfo.pickedPoint;
                     particleSystem.minSize = 0.1;
                     particleSystem.maxSize = 0.3;
@@ -66,10 +80,9 @@ class Shotgun implements Gun {
                     particleSystem.direction1 = new Vector3(-7, 8, 3);
                     particleSystem.direction2 = new Vector3(7, 8, -3);
 
-                    particleSystem.start()
+                    particleSystem.start();
                     // find the monster in the list, play the death animation, then dispose
                     monsterManager.list[pickInfo.pickedMesh.id].die();
-                    //MonsterManager.list[pickInfo.pickedMesh.id].sprite.dispose();
                 }
             }
         }
@@ -84,8 +97,9 @@ class Shotgun implements Gun {
 
         if (this.currentPosition.x != this.previousPosition.x) {
             this.waveTick++;
-            this.mesh.position.y = (1 / 50) * Math.sin(this.waveTick * 0.3) - 0.115;
-            this.mesh.position.x = (1 / 100) * Math.cos(this.waveTick * 0.2)
+            this.mesh.position.y =
+                (1 / 50) * Math.sin(this.waveTick * 0.3) - 0.115;
+            this.mesh.position.x = (1 / 100) * Math.cos(this.waveTick * 0.2);
         }
         this.previousPosition = this.currentPosition;
         if (this.timer > 0) {
@@ -94,14 +108,16 @@ class Shotgun implements Gun {
         }
 
         if (this.timer % 6 == 0) {
-            (this.mesh.material as any).diffuseTexture.uOffset = this.animationFrame[this.offset] / 7;
+            (this.mesh.material as any).diffuseTexture.uOffset =
+                this.animationFrame[this.offset] / 7;
             this.offset++;
         }
 
         if (this.timer == 0) {
             this.offset = 0;
             this.canShoot = true;
-            (this.mesh.material as any).diffuseTexture.uOffset = this.animationFrame[3] / 7;
+            (this.mesh.material as any).diffuseTexture.uOffset =
+                this.animationFrame[3] / 7;
         }
     }
 }
@@ -116,7 +132,7 @@ export class WeaponsManager {
     }
 
     run() {
-        this.weapons['shotgun'] = this.initShotgun();
+        this.weapons["shotgun"] = this.initShotgun();
     }
 
     initShotgun() {
@@ -146,5 +162,3 @@ export class WeaponsManager {
 }
 
 export const weaponsManager = new WeaponsManager();
-
-export default weaponsManager;

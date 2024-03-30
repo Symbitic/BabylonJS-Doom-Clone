@@ -1,62 +1,75 @@
-import { Material } from "@babylonjs/core";
-import {
-    AdvancedDynamicTexture,
-    Image,
-    Rectangle,
-} from "@babylonjs/gui";
-import { sounds } from "./sounds";
-import { getCameraRayCastPickInfoWithOffset } from "./utils";
-import { decalManager } from "./DecalManager";
-import { monsterManager } from "./MonsterManager";
-import { projectileManager } from "./ProjectileManager"
+import { AdvancedDynamicTexture } from "@babylonjs/gui/2D/advancedDynamicTexture.js";
+import { Image } from "@babylonjs/gui/2D/controls/image.js";
+import { Material } from "@babylonjs/core/Materials/material.js";
+import { Rectangle } from "@babylonjs/gui/2D/controls/rectangle.js";
+
+import { sounds } from "./sounds.js";
+import { getCameraRayCastPickInfoWithOffset } from "./utils.js";
+import { decalManager } from "./DecalManager.js";
+import { monsterManager } from "./MonsterManager.js";
+import { projectileManager } from "./ProjectileManager.js";
 
 function parseNumbersToArrayOfNumbers(nums: number) {
-    return nums.toString().split("").map((e) => {
-        return parseInt(e, 10);
-    });
+    return nums
+        .toString()
+        .split("")
+        .map((e) => {
+            return parseInt(e, 10);
+        });
 }
 
 function setNumbersImageDimensions(numbersImage: Image, num: number) {
     numbersImage.sourceWidth = 18;
-    numbersImage.sourceLeft = 1 + (17 * num);
+    numbersImage.sourceLeft = 1 + 17 * num;
     numbersImage.height = "9%";
     numbersImage.width = "6%";
     numbersImage.top = "40.5%";
 }
 
-function applyNumbersImageOffset(numbersImage: Image, i: number, number: number, type: string) {
+function applyNumbersImageOffset(
+    numbersImage: Image,
+    i: number,
+    number: number,
+    type: string,
+) {
     if (type === "ammo") {
         if (number >= 100) {
-            numbersImage.left = (-43 + (5 * i)).toString() + "%";//"-20%";
+            numbersImage.left = (-43 + 5 * i).toString() + "%"; //"-20%";
         } else if (number < 10) {
-            numbersImage.left = (-38 + (5 * i)).toString() + "%";//"-20%";
+            numbersImage.left = (-38 + 5 * i).toString() + "%"; //"-20%";
         } else {
-            numbersImage.left = (-40.5 + (5 * i)).toString() + "%";//"-20%";
+            numbersImage.left = (-40.5 + 5 * i).toString() + "%"; //"-20%";
         }
     }
 
     if (type === "health") {
         if (number == 100) {
-            numbersImage.left = (-20 + (5 * i)).toString() + "%";//"-20%";
+            numbersImage.left = (-20 + 5 * i).toString() + "%"; //"-20%";
         } else if (number < 10) {
-            numbersImage.left = (-15.0 + (5 * i)).toString() + "%";//"-20%";
+            numbersImage.left = (-15.0 + 5 * i).toString() + "%"; //"-20%";
         } else {
-            numbersImage.left = (-17.5 + (5 * i)).toString() + "%";//"-20%";
+            numbersImage.left = (-17.5 + 5 * i).toString() + "%"; //"-20%";
         }
     }
 
     if (type === "armor") {
         if (number == 100) {
-            numbersImage.left = (33.5 + (5 * i)).toString() + "%";//"-20%";
+            numbersImage.left = (33.5 + 5 * i).toString() + "%"; //"-20%";
         } else if (number < 10) {
-            numbersImage.left = (38.5 + (5 * i)).toString() + "%";//"-20%";
+            numbersImage.left = (38.5 + 5 * i).toString() + "%"; //"-20%";
         } else {
-            numbersImage.left = (36 + (5 * i)).toString() + "%";//"-20%";
+            numbersImage.left = (36 + 5 * i).toString() + "%"; //"-20%";
         }
     }
 }
 
-function createGunImage(gunName: string, sourceWidth: number, width: number, height: number, top: number) {
+function createGunImage(
+    gunName: string,
+    sourceWidth: number,
+    width: number,
+    height: number,
+    top: number,
+) {
     const image = new Image(gunName, `sprites/${gunName}.png`);
     image.sourceWidth = sourceWidth;
     image.width = width + "%";
@@ -83,9 +96,9 @@ export abstract class Gun {
 
     stopMovingGun() {
         this.moveTick = 0;
-        const left = this.gunImage.left as string;
-        const top = this.gunImage.top as string;
-        let imageLeftInt = parseInt(left.match(/(.+)px/)![1])
+        const left = String(this.gunImage.left);
+        const top = String(this.gunImage.top);
+        let imageLeftInt = parseInt(left.match(/(.+)px/)![1]);
         if (imageLeftInt > 0) {
             imageLeftInt -= 1;
             this.gunImage.left = imageLeftInt;
@@ -95,16 +108,16 @@ export abstract class Gun {
             this.gunImage.left = imageLeftInt;
         }
 
-        let imageTopInt = parseInt(top.match(/(.+)%/)![1])
-        const originalTop = parseInt(this.originalTop.match(/(.+)%/)![1])
+        let imageTopInt = parseInt(top.replace("%", ""));
+        const originalTop = parseInt(this.originalTop.replace("%", ""));
         if (imageTopInt > originalTop) {
             imageTopInt -= 1;
-            this.gunImage.top = imageTopInt + "%";
+            this.gunImage.top = `${imageTopInt}%`;
         }
 
         if (imageTopInt < originalTop) {
             imageTopInt += 1;
-            this.gunImage.top = imageTopInt + "%";
+            this.gunImage.top = `${imageTopInt}%`;
         }
     }
 
@@ -117,7 +130,7 @@ export abstract class Gun {
         if (this.tick > 0) {
             this.tick--;
             if (this.tick % this.fireRate === 0) {
-                this.animationIndex += 1
+                this.animationIndex += 1;
             }
             if (this.animationIndex > this.animationFrames.length - 1) {
                 this.animationIndex = 0;
@@ -149,20 +162,28 @@ export class Shotgun extends Gun {
                 }
                 const pickedMesh = pickInfo.pickedMesh!;
                 if (pickedMesh && pickedMesh.name === "imp") {
-                    monsterManager.list[pickInfo.pickedMesh!.id].getHurt(15, 10);
-                    monsterManager.list[pickInfo.pickedMesh!.id].emitBloodAt(pickInfo.pickedPoint);
+                    monsterManager.list[pickInfo.pickedMesh!.id].getHurt(
+                        15,
+                        10,
+                    );
+                    monsterManager.list[pickInfo.pickedMesh!.id].emitBloodAt(
+                        pickInfo.pickedPoint,
+                    );
                 } else {
-                    decalManager.createBulletHoleAt(pickInfo.pickedPoint!, pickInfo.getNormal(false)!);
+                    decalManager.createBulletHoleAt(
+                        pickInfo.pickedPoint!,
+                        pickInfo.getNormal(false)!,
+                    );
                 }
             }
         }
     }
 
-    stopShooting() { }
+    stopShooting() {}
 
     moveGun() {
-        this.gunImage.top = (0.05) * Math.sin(2 * (0.05 * this.moveTick)) + 0.05;
-        this.gunImage.left = 300 * (0.1) * Math.sin(0.05 * this.moveTick);
+        this.gunImage.top = 0.05 * Math.sin(2 * (0.05 * this.moveTick)) + 0.05;
+        this.gunImage.left = 300 * 0.1 * Math.sin(0.05 * this.moveTick);
     }
 }
 
@@ -187,22 +208,30 @@ export class Chaingun extends Gun {
                 }
                 const pickedMesh = pickInfo.pickedMesh;
                 if (pickedMesh && pickedMesh.name === "imp") {
-                    monsterManager.list[pickInfo.pickedMesh!.id].getHurt(15, 10);
-                    monsterManager.list[pickInfo.pickedMesh!.id].emitBloodAt(pickInfo.pickedPoint);
+                    monsterManager.list[pickInfo.pickedMesh!.id].getHurt(
+                        15,
+                        10,
+                    );
+                    monsterManager.list[pickInfo.pickedMesh!.id].emitBloodAt(
+                        pickInfo.pickedPoint,
+                    );
                 } else {
-                    decalManager.createBulletHoleAt(pickInfo.pickedPoint!, pickInfo.getNormal(true)!);
+                    decalManager.createBulletHoleAt(
+                        pickInfo.pickedPoint!,
+                        pickInfo.getNormal(true)!,
+                    );
                 }
             }
         }
     }
 
     stopShooting() {
-        this.gunImage.sourceLeft = this.animationFrames[0]
+        this.gunImage.sourceLeft = this.animationFrames[0];
     }
 
     moveGun() {
-        this.gunImage.top = (0.05) * Math.sin(2 * (0.05 * this.moveTick)) + 0.2;
-        this.gunImage.left = 300 * (0.1) * Math.sin(0.05 * this.moveTick);
+        this.gunImage.top = 0.05 * Math.sin(2 * (0.05 * this.moveTick)) + 0.2;
+        this.gunImage.left = 300 * 0.1 * Math.sin(0.05 * this.moveTick);
     }
 
     update() {
@@ -210,7 +239,7 @@ export class Chaingun extends Gun {
         if (this.tick > 0) {
             this.tick--;
             if (this.tick % this.fireRate === 0) {
-                this.animationIndex += 1
+                this.animationIndex += 1;
             }
             if (this.animationIndex > this.animationFrames.length - 1) {
                 this.animationIndex = 0;
@@ -239,8 +268,8 @@ export class RocketLauncher extends Gun {
     }
 
     moveGun() {
-        this.gunImage.top = (0.05) * Math.sin(2 * (0.05 * this.moveTick)) + 0.3;
-        this.gunImage.left = 300 * (0.1) * Math.sin(0.05 * this.moveTick);
+        this.gunImage.top = 0.05 * Math.sin(2 * (0.05 * this.moveTick)) + 0.3;
+        this.gunImage.left = 300 * 0.1 * Math.sin(0.05 * this.moveTick);
     }
 
     stopShooting() {
@@ -268,7 +297,14 @@ export class YOUIManager {
     guns: (Gun | null)[] = [];
 
     init(materials: Record<string, Material>) {
-        this.guns.push(null, null, null, new Shotgun(), new Chaingun(), new RocketLauncher());
+        this.guns.push(
+            null,
+            null,
+            null,
+            new Shotgun(),
+            new Chaingun(),
+            new RocketLauncher(),
+        );
         this.initializeGuns(materials);
 
         this.currentGun = this.guns[3]!;
@@ -291,7 +327,10 @@ export class YOUIManager {
     showHealth() {
         const healthArray = parseNumbersToArrayOfNumbers(this.health);
         for (let i = 0; i < healthArray.length; i++) {
-            const numbersImage = new Image("numbersImage", "textures/doomnumbers.png");
+            const numbersImage = new Image(
+                "numbersImage",
+                "textures/doomnumbers.png",
+            );
             setNumbersImageDimensions(numbersImage, healthArray[i]);
             applyNumbersImageOffset(numbersImage, i, this.health, "health");
             this.healthContainer.addControl(numbersImage);
@@ -301,11 +340,14 @@ export class YOUIManager {
 
     showAmmo() {
         this.mGUI.removeControl(this.ammoContainer);
-        this.ammoContainer = new Rectangle()
+        this.ammoContainer = new Rectangle();
         this.ammo = this.currentGun.ammo;
         const ammoArray = parseNumbersToArrayOfNumbers(this.ammo);
         for (let i = 0; i < ammoArray.length; i++) {
-            const numbersImage = new Image("numbersImage", "textures/doomnumbers.png");
+            const numbersImage = new Image(
+                "numbersImage",
+                "textures/doomnumbers.png",
+            );
             setNumbersImageDimensions(numbersImage, ammoArray[i]);
             applyNumbersImageOffset(numbersImage, i, this.ammo, "ammo");
             this.ammoContainer.addControl(numbersImage);
@@ -316,7 +358,10 @@ export class YOUIManager {
     showArmor() {
         const armorArray = parseNumbersToArrayOfNumbers(this.armor);
         for (let i = 0; i < armorArray.length; i++) {
-            const numbersImage = new Image("numbersImage", "textures/doomnumbers.png");
+            const numbersImage = new Image(
+                "numbersImage",
+                "textures/doomnumbers.png",
+            );
             setNumbersImageDimensions(numbersImage, armorArray[i]);
             applyNumbersImageOffset(numbersImage, i, this.armor, "armor");
             this.armorContainer.addControl(numbersImage);
@@ -389,5 +434,3 @@ export class YOUIManager {
 }
 
 export const youiManager = new YOUIManager();
-
-export default youiManager;

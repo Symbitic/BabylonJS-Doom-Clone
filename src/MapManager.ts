@@ -1,17 +1,19 @@
-import {
-    AbstractMesh,
-    Material,
-    Matrix,
-    Mesh,
-    MeshBuilder,
-    VertexData,
-} from "@babylonjs/core";
-import { scene } from "./globals";
+import { AbstractMesh } from "@babylonjs/core/Meshes/abstractMesh.js";
+import { Material } from "@babylonjs/core/Materials/material.js";
+import { Matrix } from "@babylonjs/core/Maths/math.vector.js";
+import { Mesh } from "@babylonjs/core/Meshes/mesh.js";
+import { MeshBuilder } from "@babylonjs/core/Meshes/meshBuilder.js";
+import { VertexData } from "@babylonjs/core/Meshes/mesh.vertexData.js";
+import { scene } from "./globals.js";
 
 const bustomMesh = new Mesh("wall", scene);
 
 export class Vertex {
-    constructor(public x: number, public y: number, public z: number) { }
+    constructor(
+        public x: number,
+        public y: number,
+        public z: number,
+    ) {}
 }
 
 export type Wall = [Vertex, Vertex];
@@ -32,13 +34,23 @@ export class MapManager {
         this._materials = materials;
 
         if (localStorage.getItem("map")) {
-            this.saved = JSON.parse(window.localStorage.getItem("map")!) as SavedMap;
+            this.saved = JSON.parse(
+                window.localStorage.getItem("map")!,
+            ) as SavedMap;
             this.saved.forEach(([a, b]: Wall) => {
-                this.createWall(new Vertex(a.x, a.y, a.z), new Vertex(b.x, b.y, b.z), 5);
+                this.createWall(
+                    new Vertex(a.x, a.y, a.z),
+                    new Vertex(b.x, b.y, b.z),
+                    5,
+                );
             });
         }
 
-        const ground = MeshBuilder.CreateGround("ground", { width: 500, height: 500, subdivisions: 1 }, scene) as unknown as WallMesh;
+        const ground = MeshBuilder.CreateGround(
+            "ground",
+            { width: 500, height: 500, subdivisions: 1 },
+            scene,
+        ) as unknown as WallMesh;
         ground.checkCollisions = true;
         ground.material = this._materials.e1m1floor;
         (ground.material as any).diffuseTexture.uScale = 500;
@@ -52,14 +64,30 @@ export class MapManager {
         this.saved.push([startVertex, endVertex]);
         const wallInstance = bustomMesh.clone("wall") as any;
 
-        // Give wallInstance an id 
+        // Give wallInstance an id
         wallInstance.id = `wall_${Math.random()}`;
 
         // Create custom mesh positions from vertices
         const { x, z } = startVertex;
         const positions = [
-            x, height, z, x, 0, z, endVertex.x, 0, endVertex.z,
-            x, height, z, endVertex.x, 0, endVertex.z, endVertex.x, height, endVertex.z
+            x,
+            height,
+            z,
+            x,
+            0,
+            z,
+            endVertex.x,
+            0,
+            endVertex.z,
+            x,
+            height,
+            z,
+            endVertex.x,
+            0,
+            endVertex.z,
+            endVertex.x,
+            height,
+            endVertex.z,
         ];
 
         // Create indices for each of the vertex positions
@@ -83,7 +111,10 @@ export class MapManager {
         vertexData.applyToMesh(wallInstance);
 
         // Find length between vertices
-        const length = Math.sqrt(Math.pow(endVertex.x - startVertex.x, 2) + Math.pow(endVertex.z - startVertex.z, 2));
+        const length = Math.sqrt(
+            Math.pow(endVertex.x - startVertex.x, 2) +
+                Math.pow(endVertex.z - startVertex.z, 2),
+        );
 
         // Expose startVertex and endVertex objects for map drawing
         wallInstance.startVertex = startVertex;
@@ -102,9 +133,6 @@ export class MapManager {
 
         return wallInstance;
     }
-
 }
 
 export const mapManager = new MapManager();
-
-export default mapManager;

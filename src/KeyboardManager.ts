@@ -1,51 +1,50 @@
-import { camera } from './globals';
-import { uiManager } from './UIManager';
-import { youiManager } from './YOUIManager';
+import { camera } from "./globals.js";
+import { uiManager } from "./UIManager.js";
+import { youiManager } from "./YOUIManager.js";
 
-// 61 plus key
 export class KeyboardManager {
     keys: Record<string, boolean> = {
-        'leftClick': false,
-        'plus': false,
-        'w': false,
-        'a': false,
-        's': false,
-        'd': false
-    }
+        leftClick: false,
+        plus: false,
+        w: false,
+        a: false,
+        s: false,
+        d: false,
+    };
 
     init() {
         // Attach eventhandlers to the render canvas
-        const renderCanvas = document.getElementById('renderCanvas')!;
-        renderCanvas.addEventListener('mousedown', () => {
-            this.keys['leftClick'] = true;
+        const renderCanvas = document.getElementById("renderCanvas")!;
+        renderCanvas.addEventListener("mousedown", () => {
+            this.keys["leftClick"] = true;
         });
-        renderCanvas.addEventListener('mouseup', () => {
-            this.keys['leftClick'] = false;
+        renderCanvas.addEventListener("mouseup", () => {
+            this.keys["leftClick"] = false;
         });
-        renderCanvas.addEventListener('keydown', (e) => {
-            switch (e.keyCode) {
-                case 187: // +
+        renderCanvas.addEventListener("keydown", (e) => {
+            switch (e.key) {
+                case "+":
                     camera.applyGravity = true;
                     break;
-                case 87: // W
-                    this.keys['w'] = true;
+                case "w":
+                    this.keys["w"] = true;
                     break;
-                case 65:
-                    this.keys['a'] = true;
+                case "a":
+                    this.keys["a"] = true;
                     break;
-                case 83:
-                    this.keys['s'] = true;
+                case "s":
+                    this.keys["s"] = true;
                     break;
-                case 68:
-                    this.keys['d'] = true;
+                case "d":
+                    this.keys["d"] = true;
                     break;
-                case 51: // 3
+                case "3":
                     youiManager.switchGuns(3);
                     break;
-                case 52: // 4 
+                case "4":
                     youiManager.switchGuns(4);
                     break;
-                case 53: // 5
+                case "5":
                     youiManager.switchGuns(5);
                     break;
                 default:
@@ -53,22 +52,22 @@ export class KeyboardManager {
             }
         });
 
-        renderCanvas.addEventListener('keyup', (e) => {
-            switch (e.keyCode) {
-                case 61:
+        renderCanvas.addEventListener("keyup", (e) => {
+            switch (e.key) {
+                case "=":
                     camera.applyGravity = true;
                     break;
-                case 87:
-                    this.keys['w'] = false;
+                case "w":
+                    this.keys["w"] = false;
                     break;
-                case 65:
-                    this.keys['a'] = false;
+                case "a":
+                    this.keys["a"] = false;
                     break;
-                case 83:
-                    this.keys['s'] = false;
+                case "s":
+                    this.keys["s"] = false;
                     break;
-                case 68:
-                    this.keys['d'] = false;
+                case "d":
+                    this.keys["d"] = false;
                     break;
                 default:
                     break;
@@ -96,5 +95,3 @@ export class KeyboardManager {
 }
 
 export const keyboardManager = new KeyboardManager();
-
-export default keyboardManager;

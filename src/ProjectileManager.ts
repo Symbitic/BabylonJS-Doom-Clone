@@ -1,27 +1,34 @@
-import {
-    MeshBuilder,
-    Sprite,
-    StandardMaterial,
-    Vector3,
-} from "@babylonjs/core";
-import { scene, camera } from './globals';
-import { sounds } from './sounds';
-import { sprites } from './SpriteManager';
-import { monsterManager } from './MonsterManager';
-import { keyboardManager } from './KeyboardManager';
+import { MeshBuilder } from "@babylonjs/core/Meshes/meshBuilder.js";
+import { Sprite } from "@babylonjs/core/Sprites/sprite.js";
+import { StandardMaterial } from "@babylonjs/core/Materials/standardMaterial.js";
+import { Vector3 } from "@babylonjs/core/Maths/math.vector.js";
 
-const playerRocketMesh = MeshBuilder.CreateBox('playerRocket', { height: 1, width: 1, depth: 1 }, scene);
-playerRocketMesh.material = new StandardMaterial('asd', scene);
+import { scene, camera } from "./globals.js";
+import { sounds } from "./sounds.js";
+import { sprites } from "./SpriteManager.js";
+import { monsterManager } from "./MonsterManager.js";
+import { keyboardManager } from "./KeyboardManager.js";
+
+const playerRocketMesh = MeshBuilder.CreateBox(
+    "playerRocket",
+    { height: 1, width: 1, depth: 1 },
+    scene,
+);
+playerRocketMesh.material = new StandardMaterial("asd", scene);
 playerRocketMesh.material.alpha = 0;
 playerRocketMesh.position.y = -40;
 
-const explosionMesh = MeshBuilder.CreateSphere("sphere", { diameter: 7 }, scene);
+const explosionMesh = MeshBuilder.CreateSphere(
+    "sphere",
+    { diameter: 7 },
+    scene,
+);
 explosionMesh.position.y -= 40;
-explosionMesh.material = new StandardMaterial('asd', scene);
+explosionMesh.material = new StandardMaterial("asd", scene);
 explosionMesh.material.alpha = 0.5;
 
 function explode(position: Vector3) {
-    const sprite = new Sprite("explosionSprite", sprites.Explosion)
+    const sprite = new Sprite("explosionSprite", sprites.Explosion);
     sprite.size = 5;
     const explosion = explosionMesh.createInstance("");
     explosion.position = position;
@@ -36,7 +43,6 @@ function explode(position: Vector3) {
     for (const id in monsterManager.list) {
         if (monsterManager.list[id].hitbox.intersectsMesh(explosion)) {
             monsterManager.list[id].getHurt(100, 5, explosion.position);
-
         }
     }
     explosion.dispose();
@@ -53,16 +59,19 @@ class PlayerRocket {
     velocityVector: Vector3;
 
     constructor() {
-        this.velocityVector = camera.getTarget().subtract(camera.globalPosition).normalize();
+        this.velocityVector = camera
+            .getTarget()
+            .subtract(camera.globalPosition)
+            .normalize();
         this.sprite = new Sprite("rocket", sprites.Rocket);
         this.sprite.size = 3;
 
         // Dumb trick
         if (keyboardManager.keys.a) {
-            this.cellIndexKey = 'a';
+            this.cellIndexKey = "a";
             this.sprite.cellIndex = 3;
         } else if (keyboardManager.keys.d) {
-            this.cellIndexKey = 'd';
+            this.cellIndexKey = "d";
             this.sprite.cellIndex = 2;
         } else {
             this.sprite.cellIndex = 0;
@@ -72,7 +81,9 @@ class PlayerRocket {
 
         // Set mesh properties
         this.mesh.id = `playerRocket_${this.id}`;
-        this.mesh.position = camera.position.clone().add(this.velocityVector.scale(3));
+        this.mesh.position = camera.position
+            .clone()
+            .add(this.velocityVector.scale(3));
         this.mesh.position.y -= 0.5;
 
         this.mesh.onCollide = () => {
@@ -117,5 +128,3 @@ export class ProjectileManager {
 }
 
 export const projectileManager = new ProjectileManager();
-
-export default projectileManager;

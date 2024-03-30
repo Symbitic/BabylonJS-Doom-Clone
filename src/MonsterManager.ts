@@ -1,54 +1,20 @@
-// TODO: This entire file is one big TODO.
-import {
-    AbstractMesh,
-    Mesh,
-    MeshBuilder,
-    Sound,
-    Sprite,
-    StandardMaterial,
-    Vector3,
-} from "@babylonjs/core";
-import { scene, camera } from "./globals";
-import Sounds from "./sounds";
-import SpriteManager from "./SpriteManager";
-import ParticleManager from "./ParticleManager";
+import { AbstractMesh } from "@babylonjs/core/Meshes/abstractMesh.js";
+import { Mesh } from "@babylonjs/core/Meshes/mesh.js";
+import { MeshBuilder } from "@babylonjs/core/Meshes/meshBuilder.js";
+import { Nullable } from "@babylonjs/core/types.js";
+import { Sound } from "@babylonjs/core/Audio/sound.js";
+import { Sprite } from "@babylonjs/core/Sprites/sprite.js";
+import { StandardMaterial } from "@babylonjs/core/Materials/standardMaterial.js";
+import { Vector3 } from "@babylonjs/core/Maths/math.vector.js";
+import { scene, camera } from "./globals.js";
+import { sounds as Sounds } from "./sounds.js";
+import { sprites as Sprites } from "./SpriteManager.js";
+import { particleManager } from "./ParticleManager.js";
 import {
     flipDirection,
     getDegreesBetweenTwoVectors,
     getRelativePosition,
-} from "./utils";
-
-const impHitbox = MeshBuilder.CreateBox("imp", { height: 3, width: 2, depth: 2 }, scene);
-
-export abstract class Minster { }
-
-export class Imp implements Minster {
-    id: number;
-    moveVector: Vector3;
-    hitbox: AbstractMesh;
-
-    sounds = {
-        "hurt": Sounds["hurt_imp"],
-        "death1": Sounds["impDeath1"],
-        "death2": Sounds["impDeath2"]
-    };
-
-    animations = {
-        "walkForward": [0, 3, true, 300],
-        "dead": [15, 19, false, 150],
-        "hurt": [24, 25, false, 150]
-    }
-
-    constructor() {
-        this.id = Math.random();
-        this.moveVector = new Vector3(0, 0, 0);
-        this.hitbox = impHitbox.createInstance("");
-    }
-
-    selectMoveVector() { }
-
-    update() { }
-}
+} from "./utils.js";
 
 export interface Box {
     width: number;
@@ -65,24 +31,34 @@ export interface Monster {
     includeFlight?(vector: Vector3): Vector3;
 }
 
+const impHitbox = MeshBuilder.CreateBox(
+    "imp",
+    { height: 3, width: 2, depth: 2 },
+    scene,
+);
+
 const monsters: Record<string, Monster> = {
-    "cacodemon": {
-        "hitboxProps": {
+    cacodemon: {
+        hitboxProps: {
             height: 3,
             width: 2,
-            depth: 2
+            depth: 2,
         },
-        "hitbox": MeshBuilder.CreateBox("imp", { height: 3, width: 2, depth: 2 }, scene),
-        "animations": {
-            "hurt": [0, 0, true, 300],
-            "dead": [0, 0, true, 300],
-            "down": [0, 0, true, 300]
+        hitbox: MeshBuilder.CreateBox(
+            "imp",
+            { height: 3, width: 2, depth: 2 },
+            scene,
+        ),
+        animations: {
+            hurt: [0, 0, true, 300],
+            dead: [0, 0, true, 300],
+            down: [0, 0, true, 300],
         },
-        "sounds": {
-            "hurt": Sounds[`hurt_${"cacodemon"}`],
-            "death": Sounds[`death_${"cacodemon"}`]
+        sounds: {
+            hurt: Sounds[`hurt_${"cacodemon"}`],
+            death: Sounds[`death_${"cacodemon"}`],
         },
-        "blood": {},
+        blood: {},
         includeFlight: (vector: Vector3) => {
             if (Math.random() < 0.5) {
                 vector.y = 1;
@@ -90,9 +66,9 @@ const monsters: Record<string, Monster> = {
                 vector.y = -1;
             }
             return vector;
-        }
-    }
-}
+        },
+    },
+};
 
 // Hide the original meshes
 for (const name in monsters) {
@@ -100,13 +76,42 @@ for (const name in monsters) {
     monsters[name].hitbox.position.x += 100 * Math.random();
 }
 
-export class Demon {
-    [key: string]: any;
+export class Imp {
+    id: number;
+    moveVector: Vector3;
+    hitbox: AbstractMesh;
 
+    sounds = {
+        hurt: Sounds["hurt_imp"],
+        death1: Sounds["impDeath1"],
+        death2: Sounds["impDeath2"],
+    };
+
+    animations = {
+        walkForward: [0, 3, true, 300],
+        dead: [15, 19, false, 150],
+        hurt: [24, 25, false, 150],
+    };
+
+    constructor() {
+        this.id = Math.random();
+        this.moveVector = new Vector3(0, 0, 0);
+        this.hitbox = impHitbox.createInstance("");
+    }
+
+    selectMoveVector() {}
+
+    update() {}
+}
+
+export class Demon {
     id = Math.random();
     state = 0;
     health = 100;
     speed = 0.08;
+    inPain = false;
+    painStarted = false;
+    dead = false;
     moveVector = new Vector3(0, 0, 0);
     moves: Record<string, Vector3> = {
         up: new Vector3(0, 0, 1),
@@ -116,26 +121,27 @@ export class Demon {
         upRight: new Vector3(1, 0, 1),
         upLeft: new Vector3(-1, 0, 1),
         downRight: new Vector3(1, 0, -1),
-        downLeft: new Vector3(-1, 0, -1)
+        downLeft: new Vector3(-1, 0, -1),
     };
     moveFrames = 0;
     currentMoveAnimation = "down";
     animations = {
-        'hurt': [9, 10, true, 300],
-        'dead': [10, 15, false, 200],
-        'down': [0, 0, true, 300],
-        'up': [4, 4, true, 300],
-        'upRight': [5, 5, true, 300],
-        'right': [6, 6, true, 300],
-        'downRight': [8, 8, true, 300],
-        'left': [7, 7, true, 300],
-        'upLeft': [3, 3, true, 300],
-        'downLeft': [1, 1, true, 300]
+        hurt: [9, 10, true, 300],
+        dead: [10, 15, false, 200],
+        down: [0, 0, true, 300],
+        up: [4, 4, true, 300],
+        upRight: [5, 5, true, 300],
+        right: [6, 6, true, 300],
+        downRight: [8, 8, true, 300],
+        left: [7, 7, true, 300],
+        upLeft: [3, 3, true, 300],
+        downLeft: [1, 1, true, 300],
     };
     moveVectors: Record<string, Vector3> = {};
 
     sprite: Sprite;
     hitbox: AbstractMesh;
+    hitboxProps: Box;
     private _monsterType: Monster;
 
     constructor(name: string) {
@@ -150,12 +156,16 @@ export class Demon {
         this.hitbox.id = String(this.id);
 
         // Create monster sprite.
-        this.sprite = new Sprite("cacodemonSprite", SpriteManager.Cacodemon);
+        this.sprite = new Sprite("cacodemonSprite", Sprites.Cacodemon);
         this.sprite.size = 4;
         this.sprite.position = this.hitbox.position;
 
         this.hitbox.checkCollisions = true;
-        this.hitbox.ellipsoid = new Vector3(1, this.hitboxProps.height / 2 / 2, 1);
+        this.hitbox.ellipsoid = new Vector3(
+            1,
+            this.hitboxProps.height / 2 / 2,
+            1,
+        );
         this.hitbox.onCollide = (mesh?: AbstractMesh | undefined) => {
             if (mesh && mesh.name == "wall") {
                 this.setRandomMoveVector();
@@ -167,9 +177,15 @@ export class Demon {
 
     // Set monster animations
     // Animation properties are an array that is spread to fit the sprite.animation arguments
-    // The playAnimation function is a wrapper to allow 0 to 0 frame animations 
-    playAnimation(from: number, to: number, loop: boolean, delay: number, cb?: () => void) {
-        if (cb || (from !== to)) {
+    // The playAnimation function is a wrapper to allow 0 to 0 frame animations
+    playAnimation(
+        from: number,
+        to: number,
+        loop: boolean,
+        delay: number,
+        cb?: () => void,
+    ) {
+        if (cb || from !== to) {
             this.sprite.playAnimation(from, to, loop, delay, cb);
         } else {
             this.sprite.cellIndex = from;
@@ -216,15 +232,21 @@ export class Demon {
         downLeft.z -= 1;
 
         this.moveVectors = {
-            up, down, left, right,
-            upRight, upLeft, downRight, downLeft
+            up,
+            down,
+            left,
+            right,
+            upRight,
+            upLeft,
+            downRight,
+            downLeft,
         };
-
 
         const mapped: Record<string, any> = {};
         // check distance between each move vector with player position
         for (let move in this.moveVectors) {
-            mapped[Vector3.Distance(this.moveVectors[move], camera.position)] = move;
+            mapped[Vector3.Distance(this.moveVectors[move], camera.position)] =
+                move;
         }
 
         // get the movement name of the smallest distance
@@ -245,7 +267,16 @@ export class Demon {
 
     setRandomMoveVector() {
         this.moveFrames = 50;
-        const arr = ['up', 'down', 'left', 'right', 'upLeft', 'upRight', 'downLeft', 'downRight'];
+        const arr = [
+            "up",
+            "down",
+            "left",
+            "right",
+            "upLeft",
+            "upRight",
+            "downLeft",
+            "downRight",
+        ];
         const rand = arr[Math.floor(Math.random() * arr.length)];
         this.moveVector = this.moves[rand];
         this.currentMoveAnimation = rand;
@@ -254,20 +285,23 @@ export class Demon {
         }
     }
 
-    fire() { }
+    fire() {}
 
-    emitBloodAt() {
-        ParticleManager.emit('blueBlood', this.hitbox, 40);
+    emitBloodAt(_point: Nullable<Vector3>) {
+        particleManager.emit("blueBlood", this.hitbox, 40);
     }
 
-    pushBack(power: number, pushedFrom: Vector3) {
+    pushBack(power: number, pushedFrom?: Vector3) {
         if (!pushedFrom) {
             pushedFrom = camera.globalPosition;
         }
-        this.moveVector = this.hitbox.position.subtract(pushedFrom).normalize().scale(power);
+        this.moveVector = this.hitbox.position
+            .subtract(pushedFrom)
+            .normalize()
+            .scale(power);
     }
 
-    getHurt(pain: number, pushBack: number, pushedFrom: Vector3) {
+    getHurt(pain: number, pushBack: number, pushedFrom?: Vector3) {
         this.pushBack(pushBack, pushedFrom);
         this.inPain = true;
         this.painStarted = true;
@@ -276,23 +310,37 @@ export class Demon {
 
     die() {
         this.dead = true;
-        const params = this.animations['dead'] as any[];
+        const params = this.animations["dead"] as any[];
         this.playAnimation(params[0], params[1], params[2], params[3]);
-        Math.random() < 0.5 ? this._monsterType.sounds.death.play(1) : this._monsterType.sounds.death.play(1);
+        Math.random() < 0.5
+            ? this._monsterType.sounds.death.play(1)
+            : this._monsterType.sounds.death.play(1);
     }
 
-    getAnimation() { }
+    getAnimation() {}
 
     update() {
         // Set sprite position to that of hitbox
         this.sprite.position = this.hitbox.position;
         // Set animation
         if (!this.inPain && !this.dead) {
-            const degs = getDegreesBetweenTwoVectors(this.hitbox.position, camera.position);
-            const relativePosition = getRelativePosition(degs)
-            const monsterDirection = flipDirection(this.currentMoveAnimation, relativePosition);
+            const degs = getDegreesBetweenTwoVectors(
+                this.hitbox.position,
+                camera.position,
+            );
+            const relativePosition = getRelativePosition(degs);
+            const monsterDirection = flipDirection(
+                this.currentMoveAnimation,
+                relativePosition,
+            );
             const params = (this.animations as any)[monsterDirection] as any[];
-            this.playAnimation(params[0], params[1], params[2], params[3], params[4]);
+            this.playAnimation(
+                params[0],
+                params[1],
+                params[2],
+                params[3],
+                params[4],
+            );
         }
 
         if (this.health < 0 && !this.dead) {
@@ -304,10 +352,10 @@ export class Demon {
             this.moveVector = new Vector3(0, -4, 0);
             this.moveFrames = 1000;
             this.hitbox.onCollide = (mesh?: AbstractMesh) => {
-                if (mesh && mesh.name == 'ground') {
+                if (mesh && mesh.name == "ground") {
                     this.hitbox.dispose();
                 }
-            }
+            };
         }
 
         if (this.painStarted && this.inPain && !this.dead) {
@@ -331,7 +379,7 @@ export class Demon {
 }
 
 export class MonsterManager {
-    list: Record<string, any> = {};
+    list: Record<string, Demon> = {};
 
     init() {
         monsters.cacodemon.hitbox.material = new StandardMaterial("asd", scene);
@@ -354,5 +402,3 @@ export class MonsterManager {
 }
 
 export const monsterManager = new MonsterManager();
-
-export default monsterManager;

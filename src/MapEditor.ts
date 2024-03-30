@@ -1,11 +1,11 @@
-import { Vector3 } from "@babylonjs/core";
-import { monsterManager } from "./MonsterManager";
-import { mapManager } from "./MapManager";
+import { Vector3 } from "@babylonjs/core/Maths/math.vector.js";
+import { monsterManager } from "./MonsterManager.js";
+import { mapManager } from "./MapManager.js";
 
 function convertToNearest(vector: Vector3, closest: number) {
-    const x = closest * Math.round(vector.x / closest) / 10;
-    const y = closest * Math.round(vector.y / closest) / 10;
-    const z = closest * Math.round(vector.z / closest) / 10;
+    const x = (closest * Math.round(vector.x / closest)) / 10;
+    const y = (closest * Math.round(vector.y / closest)) / 10;
+    const z = (closest * Math.round(vector.z / closest)) / 10;
     return new Vector3(x, y, -z);
 }
 
@@ -31,7 +31,10 @@ export class MapEditor {
 
         const saveMapButton = document.getElementById("saveMap")!;
         saveMapButton.addEventListener("click", () => {
-            window.localStorage.setItem("map", JSON.stringify(mapManager.saved));
+            window.localStorage.setItem(
+                "map",
+                JSON.stringify(mapManager.saved),
+            );
         });
 
         const deleteMapButton = document.getElementById("deleteMap")!;
@@ -42,13 +45,19 @@ export class MapEditor {
         this.canvas.addEventListener("mousedown", (e) => {
             if (getSelectItem("mainSelect") == "wall") {
                 this.holdingMouse = true;
-                this.startVertex = convertToNearest(new Vector3(e.offsetX, 5, e.offsetY), 30);
+                this.startVertex = convertToNearest(
+                    new Vector3(e.offsetX, 5, e.offsetY),
+                    30,
+                );
             }
         });
 
         this.canvas.addEventListener("mousemove", (e) => {
             if (this.holdingMouse && this.startVertex) {
-                this.endVertex = convertToNearest(new Vector3(e.offsetX, 5, e.offsetY), 30);
+                this.endVertex = convertToNearest(
+                    new Vector3(e.offsetX, 5, e.offsetY),
+                    30,
+                );
             }
         });
 
@@ -63,12 +72,18 @@ export class MapEditor {
 
         this.canvas.addEventListener("click", (e) => {
             if (getSelectItem("mainSelect") == "Imp") {
-                const vertex = convertToNearest(new Vector3(e.offsetX, 5, e.offsetY), 30);
+                const vertex = convertToNearest(
+                    new Vector3(e.offsetX, 5, e.offsetY),
+                    30,
+                );
                 const Imp = monsterManager.create("cacodemon");
 
-                Imp.hitbox.position = new Vector3(vertex.x, Imp.hitboxProps.height / 2, vertex.z);
+                Imp.hitbox.position = new Vector3(
+                    vertex.x,
+                    Imp.hitboxProps.height / 2,
+                    vertex.z,
+                );
                 Imp.sprite.position = Imp.hitbox.position;
-
             }
         });
     }
@@ -85,10 +100,10 @@ export class MapEditor {
     }
 
     update() {
-        this.ctx.clearRect(0, 0, 1000, 1000)
+        this.ctx.clearRect(0, 0, 1000, 1000);
         this.createGrid();
         if (this.startVertex && this.endVertex) {
-            this.ctx.beginPath()
+            this.ctx.beginPath();
             this.ctx.moveTo(this.startVertex.x, this.startVertex.y);
             this.ctx.lineTo(this.endVertex.x, this.endVertex.y);
             this.ctx.stroke();
@@ -96,8 +111,11 @@ export class MapEditor {
         for (const id in mapManager.list) {
             const wall = mapManager.list[id];
             if (wall.name == "wall") {
-                this.ctx.beginPath()
-                this.ctx.moveTo(wall.startVertex.x * 10, -wall.startVertex.z * 10);
+                this.ctx.beginPath();
+                this.ctx.moveTo(
+                    wall.startVertex.x * 10,
+                    -wall.startVertex.z * 10,
+                );
                 this.ctx.lineTo(wall.endVertex.x * 10, -wall.endVertex.z * 10);
                 this.ctx.stroke();
             }
