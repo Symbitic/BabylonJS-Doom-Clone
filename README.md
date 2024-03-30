@@ -1,13 +1,13 @@
 # BabylonJS-Doom-Clone
 
-![Deploy to GitHub Pages](https://github.com/Symbitic/BabylonJS-Doom-Clone/actions/workflows/deploy.yml/badge.svg)
+![Deploy to GitHub Pages](https://github.com/babylonjs-archive/doom-clone/actions/workflows/deploy.yml/badge.svg)
 
-This is a modernized fork of <https://github.com/CelesteComet/BabylonJS-Doom-Clone> that adds TypeScript and Vite support for faster development.
+This is a fork of the original here: <https://github.com/CelesteComet/BabylonJS-Doom-Clone>
 
-View the live site here: <https://symbitic.github.io/BabylonJS-Doom-Clone/>
+View the live site here: <https://babylonjs-archive.github.io/doom-clone/>
 
 To run locally, clone the repository and run this:
 
-    cd BabylonJS-Doom-Clone
+    cd doom-clone
     npm install
     npm run dev
